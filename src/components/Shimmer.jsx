@@ -16,7 +16,7 @@ const Shimmer = () => {
             Top Rated Restaurant
           </button>
         </div>
-        <div className="flex flex-wrap my-4 md:my-6 md:ml-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 justify-items-center my-4 md:my-6">
           {shimmerCards.map((_, index) => (
             <div
               key={index}
