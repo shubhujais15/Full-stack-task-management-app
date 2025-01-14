@@ -6,95 +6,50 @@ import { useState } from "react";
 
 const Restaurantmenu = () => {
     const [showIndex, setShowIndex] = useState(null);
-    // console.log(showIndex)
-    
     const { resid } = useParams();
     const RestMenu = useRestaurantmenu(resid);
 
     if (RestMenu === null) return <ShimmerMenu />;
-      
-    const { name, cuisines, costForTwo } = RestMenu?.cards[2]?.card?.card?.info;
+    if (RestMenu === "error") {
+        return <div className="text-center mt-10">Failed to load data. Please try again later.</div>;
+    }
 
-    const categories = RestMenu?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards.filter(
-        (c) => c.card?.["card"]?.["@type"] === "type.googleapis.com/swiggy.presentation.food.v2.ItemCategory"
-    );
-    // console.log(categories)
+    // Extract restaurant info
+    const { name, cuisines, costForTwo } = RestMenu?.cards?.[2]?.card?.card?.info || {};
+
+    // Dynamically locate categories
+    const groupedCard = RestMenu?.cards?.find((card) => card.groupedCard)?.groupedCard;
+    const categories =
+        groupedCard?.cardGroupMap?.REGULAR?.cards?.filter(
+            (c) =>
+                c.card?.["card"]?.["@type"] ===
+                "type.googleapis.com/swiggy.presentation.food.v2.ItemCategory"
+        ) || [];
+
+    console.log("Categories:", categories); // Debugging log
+
     return (
-        <div className="text-center w-screen">
-            <h1 className="font-bold my-6 text-2xl">{name}</h1>
-            <p className="font-semibold text-lg">{cuisines.join(", ")} -- ₹{costForTwo / 100}</p>
+        <div className="text-center w-full">
+            <h1 className="font-bold my-6 text-2xl">{name || "Restaurant"}</h1>
+            <p className="font-semibold text-lg">
+                {cuisines?.join(", ") || "Cuisines unavailable"} -- ₹{(costForTwo || 0) / 100}
+            </p>
             <div>
-                {categories.map((category, index) => (
-                    <RestaurantCategory 
-                        key={category?.card?.card?.title} 
-                        data={category?.card?.card} 
-                        showItems={index === showIndex}
-                        setShowIndex={() => setShowIndex(index === showIndex ? null : index)}
-                    />
-                ))}
+                {categories.length > 0 ? (
+                    categories.map((category, index) => (
+                        <RestaurantCategory
+                            key={category?.card?.card?.title || index}
+                            data={category?.card?.card}
+                            showItems={index === showIndex}
+                            setShowIndex={() => setShowIndex(index === showIndex ? null : index)}
+                        />
+                    ))
+                ) : (
+                    <p className="text-center mt-6">Menu categories are currently unavailable.</p>
+                )}
             </div>
         </div>
     );
 };
 
 export default Restaurantmenu;
-
-
-
-
-
-
-// import ShimmerMenu from "./Shimmer";
-// import { useParams } from "react-router-dom";
-// import useRestaurantmenu from "../utils/useRestaurantmenu"
-// import RestaurantCategory from "./RestaurantCategory";
-// import { useState } from "react";
-
-// const Restaurantmenu = () => {
-
-//     const [showIndex ,setShowIndex] = useState(null);
-//     const [showItems , setShowItems] = useState(false);
-    
-//     const {resid} = useParams();
-//     // console.log(resid)
-
-//     const RestMenu = useRestaurantmenu(resid);
-
-//     if(RestMenu === null)
-//         return <ShimmerMenu />;
-      
-//     const { name, cuisines , costForTwo } = RestMenu?.cards[2]?.card?.card?.info;
-
-//     // const {itemCards} = RestMenu?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards[2]?.card?.card; 
-
-//     const categories = RestMenu?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards.filter(
-//         (c)=>
-//         c.card?.["card"]?.["@type"] === "type.googleapis.com/swiggy.presentation.food.v2.ItemCategory"
-//     )
-
-   
-
-//     return(
-//         <div className="text-center">
-//             <h1 className="font-bold my-6 text-2xl">{name}</h1>
-//             <p className="font-semibold text-lg">{cuisines.join(", ")} -- ₹{costForTwo/100}</p>
-//             <p>
-//                 {categories.map((category,index) => (
-//                 <RestaurantCategory 
-//                 key={category?.card?.card?.itemCards?.card?.info?.id} 
-//                 data={category?.card?.card} 
-//                 showItems={index === showIndex ? true : false}
-//                 setShowIndex = {() => setShowIndex(index)}
-//                 />))}
-//             </p>
-
-
-//             {/* <ul>
-//                 {itemCards.map(item => <li key={item.card.info.name}>{item.card.info.name}</li>)}
-//                 <li>{itemCards[0]?.card?.info?.name}</li>
-//             </ul> */}
-
-//         </div>
-//     )
-// }
-// export default Restaurantmenu;
