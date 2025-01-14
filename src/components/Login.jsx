@@ -26,33 +26,22 @@ const Login = () => {
     if (message) return;
 
     if (!isSignInForm) {
-      // Sign-up logic
       createUserWithEmailAndPassword(auth, emailValue, passwordValue)
         .then((userCredential) => {
           const user = userCredential.user;
-          updateProfile(user, {
-            displayName: name.current.value
-          }).then(() => {
-            const { uid, email, displayName, photoURL } = auth.currentUser;
-            dispatch(addUser({ uid, email, displayName, photoURL }));
-            navigate("/home");
-          }).catch((error) => {
-            setErrorMessage(error.message);
-          });
+          updateProfile(user, { displayName: name.current.value })
+            .then(() => {
+              const { uid, email, displayName, photoURL } = auth.currentUser;
+              dispatch(addUser({ uid, email, displayName, photoURL }));
+              navigate("/home");
+            })
+            .catch((error) => setErrorMessage(error.message));
         })
-        .catch((error) => {
-          setErrorMessage(error.message);
-        });
+        .catch((error) => setErrorMessage(error.message));
     } else {
-      // Sign-in logic
       signInWithEmailAndPassword(auth, emailValue, passwordValue)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          navigate("/home");
-        })
-        .catch((error) => {
-          setErrorMessage("User Not Registered");
-        });
+        .then(() => navigate("/home"))
+        .catch(() => setErrorMessage("User Not Registered"));
     }
   };
 
@@ -61,68 +50,84 @@ const Login = () => {
   };
 
   const handleInputChange = () => {
-    if (errorMessage) {
-      setErrorMessage(null);
-    }
+    if (errorMessage) setErrorMessage(null);
   };
 
   return (
-    <div className="shadow-xl">
+    <>
       <Header />
-      <div className='mt-4 mx-2 rounded-lg shadow-md md:flex'>
-        <img className='md:w-1/2 md:h-1/2 rounded-md' src="https://wallpapercave.com/wp/wp9919642.jpg" alt="background-img" />
-        <h1 className='md:ml-40 mt-5 md:mt-2 italic text-xl md:text-2xl text-pink-950'>Step into flavor. Sign in to enjoy your meal😊</h1>
-      </div>
-
-          
-      <form
-        onSubmit={(e) => e.preventDefault()}
-        className="absolute bg-teal-600 p-8 top-[82%] md:top-[430px] ml-[205px] md:ml-[1150px] transform -translate-x-1/2 -translate-y-1/2 w-11/12 sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12 text-white bg-opacity-90 rounded-xl "
-      >
-        <h1 className="md:py-4 mb-4 md:mb-0 font-bold text-3xl">{isSignInForm ? "Sign In" : "Sign Up"}</h1>
-
-        {!isSignInForm && (
-          <input
-            ref={name}
-            type="text"
-            placeholder="👤Full Name"
-            className="p-2 my-2 md:my-3 w-full text-black bg-white rounded-md outline-transparent"
-            onChange={handleInputChange}
+      <div className="flex flex-col md:flex-row my-4 md:my-2 overflow-hidden">
+        {/* Left Section */}
+        <div className="md:w-1/2 h-full flex justify-center items-center rounded-lg">
+          <img
+            src="https://wallpapercave.com/wp/wp9919642.jpg"
+            alt="background-img"
+            className="w-full h-full md:h-[530px] mx-0 md:mx-2 object-cover rounded-lg"
           />
-        )}
-
-        <input
-          ref={email}
-          type="text"
-          placeholder="✉️ Email Address"
-          className="p-2 my-2 md:my-3 w-full text-black bg-white rounded-md outline-transparent"
-          onChange={handleInputChange}
-        />
-        <input
-          ref={password}
-          type="password"
-          placeholder="🔑 Password"
-          className="p-2 my-2 md:my-3 w-full text-black bg-white rounded-md outline-transparent"
-          onChange={handleInputChange}
-        />
-
-        <button
-          className="p-2 my-3 md:my-5 ml-1 w-1/2 rounded-lg bg-zinc-700 hover:bg-zinc-800 active:scale-95 focus:outline-none"
-          onClick={handleButtonClick}
-        >
-          {isSignInForm ? "Sign In" : "Sign Up"}
-        </button>
-
-        {errorMessage && <p className="text-red-500 md:m-1 mx-2 my-1 md:font-bold font-medium">{errorMessage}</p>}
-
-        <div className="flex">
-          <p className="mx-2">{!isSignInForm ? "Already Registered?" : "New to QuickBite?"}</p>
-          <p className="cursor-pointer" onClick={toggleisSignInForm}>
-            {isSignInForm ? "Sign up now" : "Sign in now"}
-          </p>
         </div>
-      </form>
-    </div>
+
+        {/* Right Section */}
+        <div className="md:w-1/2 h-full flex flex-col justify-center my-0 md:my-10 items-center px-6">
+          <h1 className="text-xl md:text-2xl italic mb-4 text-center text-pink-950">
+            Step into flavor. Sign in to enjoy your meal 😊
+          </h1>
+
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="w-full md:w-1/2 my-0 md:my-8 max-w-md p-6 text-white bg-teal-600 bg-opacity-90 rounded-lg"
+          >
+            <h1 className="text-3xl mb-4 text-center font-bold">
+              {isSignInForm ? "Sign In" : "Sign Up"}
+            </h1>
+
+            {!isSignInForm && (
+              <input
+                ref={name}
+                type="text"
+                placeholder="👤 Full Name"
+                className="p-2 mb-4 w-full bg-white text-black rounded-md outline-transparent"
+                onChange={handleInputChange}
+              />
+            )}
+
+            <input
+              ref={email}
+              type="text"
+              placeholder="✉️ Email Address"
+              className="p-2 mb-4 w-full bg-white text-black rounded-md outline-transparent"
+              onChange={handleInputChange}
+            />
+            <input
+              ref={password}
+              type="password"
+              placeholder="🔑 Password"
+              className="p-2 mb-4 w-full bg-white text-black rounded-md outline-transparent"
+              onChange={handleInputChange}
+            />
+
+            <button
+              className="p-2 mb-4 w-full rounded-lg bg-zinc-700 hover:bg-zinc-800 text-white"
+              onClick={handleButtonClick}
+            >
+              {isSignInForm ? "Sign In" : "Sign Up"}
+            </button>
+
+            {errorMessage && (
+              <p className="text-red-500 text-center">{errorMessage}</p>
+            )}
+
+            <div className="flex justify-center">
+              <p className="mr-2">
+                {!isSignInForm ? "Already Registered?" : "New to QuickBite?"}
+              </p>
+              <p className="cursor-pointer underline" onClick={toggleisSignInForm}>
+                {isSignInForm ? "Sign up now" : "Sign in now"}
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
   );
 };
 
